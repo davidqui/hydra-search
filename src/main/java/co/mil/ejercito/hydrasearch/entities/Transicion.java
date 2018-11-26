@@ -6,9 +6,8 @@
 package co.mil.ejercito.hydrasearch.entities;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.math.BigInteger;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,9 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
@@ -39,15 +36,16 @@ public class Transicion implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_transicion")
     private Long idTransicion;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
+    @Size(max = 20)
     @Column(name = "estado")
     private String estado;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idTransicion")
-    private Collection<Transaccion> transaccionCollection;
+    @Column(name = "activo")
+    private Boolean activo;
+    @JoinColumn(name = "id_transaccion", referencedColumnName = "id_transaccion")
+    @ManyToOne
+    private Transaccion idTransaccion;
     @JoinColumn(name = "login_usuario", referencedColumnName = "login")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private Usuario loginUsuario;
 
     public Transicion() {
@@ -55,11 +53,6 @@ public class Transicion implements Serializable {
 
     public Transicion(Long idTransicion) {
         this.idTransicion = idTransicion;
-    }
-
-    public Transicion(Long idTransicion, String estado) {
-        this.idTransicion = idTransicion;
-        this.estado = estado;
     }
 
     public Long getIdTransicion() {
@@ -78,12 +71,20 @@ public class Transicion implements Serializable {
         this.estado = estado;
     }
 
-    public Collection<Transaccion> getTransaccionCollection() {
-        return transaccionCollection;
+    public Boolean getActivo() {
+        return activo;
     }
 
-    public void setTransaccionCollection(Collection<Transaccion> transaccionCollection) {
-        this.transaccionCollection = transaccionCollection;
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
+    public Transaccion getIdTransaccion() {
+        return idTransaccion;
+    }
+
+    public void setIdTransaccion(Transaccion idTransaccion) {
+        this.idTransaccion = idTransaccion;
     }
 
     public Usuario getLoginUsuario() {

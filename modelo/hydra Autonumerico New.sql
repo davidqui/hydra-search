@@ -18,12 +18,9 @@ PRIMARY KEY ("id_clasificacion")
 WITHOUT OIDS;
 CREATE TABLE "TRANSACCION" (
 "id_transaccion" serial8 NOT NULL,
-"id_documento" int8 NOT NULL,
-"id_clasificacion" int8 NOT NULL,
 "id_credibilidad" int8 NOT NULL,
-"id_tipo_transaccion" int8 NOT NULL,
 "id_exactitud" int8 NOT NULL,
-"id_transicion" int8 NOT NULL,
+"id_documento" int8 NOT NULL,
 "fecha_transaccion" timestamp(15) NOT NULL,
 "calificacion_calculada" int8 NOT NULL,
 "descripcion" varchar(255) NOT NULL,
@@ -46,11 +43,12 @@ PRIMARY KEY ("id_credibilidad")
 )
 WITHOUT OIDS;
 CREATE TABLE "DOCUMENTO" (
+"id_clasificacion" int8 NOT NULL,
+"id_tipo_doc" int8 NOT NULL,
 "id_documento" serial8 NOT NULL,
 "nombre_doc" varchar(60) NOT NULL,
 "url_documento" text NOT NULL,
 "fecha_creacion" date NOT NULL,
-"id_tipo_doc" int8 NOT NULL,
 "extension" varchar(15) NOT NULL,
 "acceso_privado" int2 NOT NULL,
 PRIMARY KEY ("id_documento") 
@@ -71,32 +69,35 @@ PRIMARY KEY ("id_factores")
 WITHOUT OIDS;
 CREATE TABLE "FACTORES_TRANSACCION" (
 "id_factores" int8 NOT NULL,
-"id_transaccion" int8 NOT NULL
+"id_transaccion" int8 NOT NULL,
+PRIMARY KEY ("id_factores", "id_transaccion") 
 )
 WITHOUT OIDS;
 CREATE TABLE "AMENAZA_TRANSACCION" (
 "id_amenaza" int8 NOT NULL,
-"id_transaccion" int8 NOT NULL
+"id_transaccion" int8 NOT NULL,
+PRIMARY KEY ("id_amenaza", "id_transaccion") 
 )
 WITHOUT OIDS;
 CREATE TABLE "USUARIO" (
 "id_ldap" int8,
 "id_unidad" int8 NOT NULL,
 "login" varchar(60) NOT NULL,
+"nombre" varchar(255) NOT NULL,
 "nivel_clasificacion" varchar(20) NOT NULL,
 PRIMARY KEY ("login") 
 )
 WITHOUT OIDS;
 CREATE TABLE "TRANSICION" (
+"id_transaccion" int8 NOT NULL,
 "login_usuario" varchar(60) NOT NULL,
 "id_transicion" serial8 NOT NULL,
 "estado" varchar(20) NOT NULL,
+"activo" int8 NOT NULL,
 PRIMARY KEY ("id_transicion") 
 )
 WITHOUT OIDS;
 
-ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_DOCUMENTO" FOREIGN KEY ("id_documento") REFERENCES "DOCUMENTO" ("id_documento");
-ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_CLASIFICACION" FOREIGN KEY ("id_clasificacion") REFERENCES "CLASIFICACION" ("id_clasificacion");
 ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_CREDIBILIDAD" FOREIGN KEY ("id_credibilidad") REFERENCES "CREDIBILIDAD" ("id_credibilidad");
 ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_EXACTITUD" FOREIGN KEY ("id_exactitud") REFERENCES "EXACTITUD" ("id_exactitud");
 ALTER TABLE "FACTORES_TRANSACCION" ADD CONSTRAINT "fk_FACT_TRANSACCION_FACTORES_INESTABILIDAD" FOREIGN KEY ("id_factores") REFERENCES "FACTORES_INESTABILIDAD" ("id_factores");
@@ -105,8 +106,10 @@ ALTER TABLE "FACTORES_TRANSACCION" ADD CONSTRAINT "fk_FACTORES_TRANSACCION_TRANS
 ALTER TABLE "AMENAZA_TRANSACCION" ADD CONSTRAINT "fk_AMENAZA_TRANSACCION_TRANSACCION" FOREIGN KEY ("id_transaccion") REFERENCES "TRANSACCION" ("id_transaccion");
 ALTER TABLE "USUARIO" ADD CONSTRAINT "fk_USUARIO_UNIDAD" FOREIGN KEY ("id_unidad") REFERENCES "UNIDAD" ("id_unidad");
 ALTER TABLE "DOCUMENTO" ADD CONSTRAINT "fk_DOCUMENTO_TIPO_DOC" FOREIGN KEY ("id_tipo_doc") REFERENCES "TIPO_DOC" ("id_tipo_doc");
-ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_TRANSICION" FOREIGN KEY ("id_transicion") REFERENCES "TRANSICION" ("id_transicion");
 ALTER TABLE "TRANSICION" ADD CONSTRAINT "fk_TRANSICION_USUARIO" FOREIGN KEY ("login_usuario") REFERENCES "USUARIO" ("login");
+ALTER TABLE "TRANSICION" ADD CONSTRAINT "fk_TRANSICION_TRANSACCION" FOREIGN KEY ("id_transaccion") REFERENCES "TRANSACCION" ("id_transaccion");
+ALTER TABLE "DOCUMENTO" ADD CONSTRAINT "fk_DOCUMENTO_CLASIFICACION" FOREIGN KEY ("id_clasificacion") REFERENCES "CLASIFICACION" ("id_clasificacion");
+ALTER TABLE "TRANSACCION" ADD CONSTRAINT "fk_TRANSACCION_DOCUMENTO" FOREIGN KEY ("id_documento") REFERENCES "DOCUMENTO" ("id_documento");
 
 
 -- ----------------------------
@@ -197,4 +200,13 @@ INSERT INTO "UNIDAD" VALUES (6, 'CI3MO5');
 INSERT INTO "UNIDAD" VALUES (7, 'CI3MO6');
 INSERT INTO "UNIDAD" VALUES (8, 'CI3MO7');
 INSERT INTO "UNIDAD" VALUES (9, 'CI3MO8');
+COMMIT;
+
+-- ----------------------------
+-- Records of USUARIO
+-- ----------------------------
+BEGIN;
+INSERT INTO "public"."USUARIO" VALUES (1, 2, 'aherreram', 'Restringido', 'Alejandro Herrera Montilla');
+INSERT INTO "public"."USUARIO" VALUES (2, 2, 'jcespedeso', 'Secreto', 'Johan Miguel Céspedes Ortega');
+INSERT INTO "public"."USUARIO" VALUES (3, 4, 'dquijanor', 'Confidencial', 'David Antonio Quijano Ramos');
 COMMIT;

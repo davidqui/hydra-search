@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,8 +22,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  *
@@ -42,34 +43,28 @@ public class Documento implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_documento")
     private Long idDocumento;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 60)
+    @Size(max = 60)
     @Column(name = "nombre_doc")
     private String nombreDoc;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 2147483647)
+    @Size(max = 2147483647)
     @Column(name = "url_documento")
     private String urlDocumento;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "fecha_creacion")
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fechaCreacion;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 15)
+    @Size(max = 15)
     @Column(name = "extension")
     private String extension;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "acceso_privado")
-    private short accesoPrivado;
+    @Column(name = "acceso_privado", columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean accesoPrivado;
+    @JoinColumn(name = "id_clasificacion", referencedColumnName = "id_clasificacion")
+    @ManyToOne
+    private Clasificacion idClasificacion;
     @JoinColumn(name = "id_tipo_doc", referencedColumnName = "id_tipo_doc")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private TipoDoc idTipoDoc;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idDocumento")
+    @OneToMany(mappedBy = "idDocumento")
     private Collection<Transaccion> transaccionCollection;
 
     public Documento() {
@@ -77,15 +72,6 @@ public class Documento implements Serializable {
 
     public Documento(Long idDocumento) {
         this.idDocumento = idDocumento;
-    }
-
-    public Documento(Long idDocumento, String nombreDoc, String urlDocumento, Date fechaCreacion, String extension, short accesoPrivado) {
-        this.idDocumento = idDocumento;
-        this.nombreDoc = nombreDoc;
-        this.urlDocumento = urlDocumento;
-        this.fechaCreacion = fechaCreacion;
-        this.extension = extension;
-        this.accesoPrivado = accesoPrivado;
     }
 
     public Long getIdDocumento() {
@@ -128,12 +114,20 @@ public class Documento implements Serializable {
         this.extension = extension;
     }
 
-    public short getAccesoPrivado() {
+    public Boolean getAccesoPrivado() {
         return accesoPrivado;
     }
 
-    public void setAccesoPrivado(short accesoPrivado) {
+    public void setAccesoPrivado(Boolean accesoPrivado) {
         this.accesoPrivado = accesoPrivado;
+    }
+
+    public Clasificacion getIdClasificacion() {
+        return idClasificacion;
+    }
+
+    public void setIdClasificacion(Clasificacion idClasificacion) {
+        this.idClasificacion = idClasificacion;
     }
 
     public TipoDoc getIdTipoDoc() {

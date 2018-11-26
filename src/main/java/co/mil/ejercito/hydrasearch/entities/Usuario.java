@@ -8,9 +8,7 @@ package co.mil.ejercito.hydrasearch.entities;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Objects;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -44,14 +42,19 @@ public class Usuario implements Serializable {
     private String login;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 100)
+    @Column(name = "nombre")
+    private String nombre;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 30)
     @Column(name = "nivel_clasificacion")
     private String nivelClasificacion;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loginUsuario")
-    private Collection<Transicion> transicionCollection;
     @JoinColumn(name = "id_unidad", referencedColumnName = "id_unidad")
     @ManyToOne(optional = false)
     private Unidad idUnidad;
+    @OneToMany(mappedBy = "loginUsuario")
+    private Collection<Transicion> transicionCollection;
 
     public Usuario() {
     }
@@ -60,8 +63,9 @@ public class Usuario implements Serializable {
         this.login = login;
     }
 
-    public Usuario(String login, String nivelClasificacion) {
+    public Usuario(String login, String nombre, String nivelClasificacion) {
         this.login = login;
+        this.nombre = nombre;
         this.nivelClasificacion = nivelClasificacion;
     }
 
@@ -81,20 +85,20 @@ public class Usuario implements Serializable {
         this.login = login;
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     public String getNivelClasificacion() {
         return nivelClasificacion;
     }
 
     public void setNivelClasificacion(String nivelClasificacion) {
         this.nivelClasificacion = nivelClasificacion;
-    }
-
-    public Collection<Transicion> getTransicionCollection() {
-        return transicionCollection;
-    }
-
-    public void setTransicionCollection(Collection<Transicion> transicionCollection) {
-        this.transicionCollection = transicionCollection;
     }
 
     public Unidad getIdUnidad() {
@@ -105,42 +109,29 @@ public class Usuario implements Serializable {
         this.idUnidad = idUnidad;
     }
 
+    public Collection<Transicion> getTransicionCollection() {
+        return transicionCollection;
+    }
+
+    public void setTransicionCollection(Collection<Transicion> transicionCollection) {
+        this.transicionCollection = transicionCollection;
+    }
+
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.idLdap);
-        hash = 79 * hash + Objects.hashCode(this.login);
-        hash = 79 * hash + Objects.hashCode(this.nivelClasificacion);
-        hash = 79 * hash + Objects.hashCode(this.transicionCollection);
-        hash = 79 * hash + Objects.hashCode(this.idUnidad);
+        int hash = 0;
+        hash += (login != null ? login.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Usuario)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Usuario other = (Usuario) obj;
-        if (!Objects.equals(this.login, other.login)) {
-            return false;
-        }
-        if (!Objects.equals(this.nivelClasificacion, other.nivelClasificacion)) {
-            return false;
-        }
-        if (!Objects.equals(this.idLdap, other.idLdap)) {
-            return false;
-        }
-        if (!Objects.equals(this.transicionCollection, other.transicionCollection)) {
-            return false;
-        }
-        if (!Objects.equals(this.idUnidad, other.idUnidad)) {
+        Usuario other = (Usuario) object;
+        if ((this.login == null && other.login != null) || (this.login != null && !this.login.equals(other.login))) {
             return false;
         }
         return true;
@@ -148,7 +139,7 @@ public class Usuario implements Serializable {
 
     @Override
     public String toString() {
-        return "Usuario{" + "idLdap=" + idLdap + ", login=" + login + ", nivelClasificacion=" + nivelClasificacion + ", idUnidad=" + idUnidad + '}';
+        return "co.mil.ejercito.hydrasearch.entities.Usuario[ login=" + login + " ]";
     }
-
+    
 }

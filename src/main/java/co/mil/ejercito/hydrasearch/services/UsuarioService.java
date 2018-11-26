@@ -20,8 +20,9 @@ public class UsuarioService {
      * @param sort Criterio de ordenamiento
      * @return Lista de Objetos Amenaza
      */
-    public List <Usuario> findAll(Sort sort) {
-        return usuarioRepository.findAll(sort);
+    public List <Usuario> findAllByUnidad(Sort sort) {
+//        return usuarioRepository.findAllOrOrderByIdUnidadIsNotNull(sort);
+        return usuarioRepository.findAllGroupByIdUnidadIsNotNull(sort);
     }
-    
+
 }

@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+
+import co.mil.ejercito.hydrasearch.entities.Transicion;
+import co.mil.ejercito.hydrasearch.entities.Usuario;
+import co.mil.ejercito.hydrasearch.repositories.TransicionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -31,92 +35,59 @@ public class TransaccionService {
     @Autowired
     private DocumentoRepository documentoRepository;
 
-        
-    /**
-     * Metodo que permite modelar la estructura del directorio raiz donde se 
-     * almacenaran aleatoriamente los archivos.
-     * 
-     * @param directorioRoot Directorio raiz definido en el application.properties
-     * @return Estructura definitiva del directorio para el evento.
-     */
-    public String generarEstructuraRoot(String directorioRoot){
-        LocalDate actual= LocalDate.now();
-        int directorioA = ThreadLocalRandom.current().nextInt(1, 12);
-        int directorioB = ThreadLocalRandom.current().nextInt(1, 12);
-        int directorioC = ThreadLocalRandom.current().nextInt(1, 12);
-        String directorio = directorioRoot+File.separator+actual.getYear()+File.separator+directorioA+File.separator+directorioB+File.separator+directorioC;
-        return directorio;
-    }
-    
-    /**
-     * Crea el directorio root y los subdirectorios del evento validando
-     * previamente si existe o no.
-     *
-     * @param directorioRoot Directorio principal.
-     * @param subDirectorioEvento Subdirectorio secundario uno por evento.
-     */
-    public void crearDirectorios(String directorioRoot, BigDecimal subDirectorioEvento) {
-        boolean existeDirectorioRoot = validarExistenciaDirectorio(directorioRoot);
-        boolean existeDirectorioEvento = validarExistenciaDirectorio(directorioRoot + File.separator + subDirectorioEvento);
-        Path dirPathObj = Paths.get(directorioRoot);
-        Path sudDirPathObj = Paths.get(directorioRoot + File.separator + subDirectorioEvento.toString());
+    @Autowired
+    private TransicionRepository transicionRepository;
 
-        try {
-            if (!existeDirectorioRoot) {
-                Files.createDirectories(dirPathObj);
-                Files.createDirectories(sudDirPathObj);
-            }
 
-            if (!existeDirectorioEvento) {
-                Files.createDirectories(sudDirPathObj);
-            }
-        } catch (IOException ioExceptionObj) {
-            System.out.println("Se genero un problema al crear el directorio = " + ioExceptionObj.getMessage());
-        }
-    }
-
-    /**
-     * Crea un directorio validando previamente si existe o no.
-     *
-     * @param directorio Nombre del Directorio a crear.
-     */
-    public void crearDirectorio(Object directorio) {
-        boolean existeDirectorio = validarExistenciaDirectorio(directorio);
-        Path directorioPath = Paths.get(directorio.toString());
-
-        try {
-            if (!existeDirectorio) {
-                Files.createDirectories(directorioPath);
-            }
-
-        } catch (IOException ioExceptionObj) {
-            System.out.println("Se genero un problema al crear el directorio = " + ioExceptionObj.getMessage());
-        }
-    }
-
-    /**
-     * Valida si un directorio existe.
-     *
-     * @param directorioValidar Directorio a evaluar.
-     * @return
-     */
-    public boolean validarExistenciaDirectorio(Object directorioValidar) {
-        return Files.exists(Paths.get(directorioValidar.toString()));
-    }
-
-    
-    /**
-     * Metodo para crear un nuevo registro de Transaccion.
-     * 
-     * @param transaccion Coleccion de atributos y valores del objeto Transaccion.
-     * @param directorioRoot Directorio principal.
-     * @param subDirectorio Directorio final.
-     * @return El objeto Transaccion modelado y listo para hacer persistencia con la base de datos.
-     */
-    public Transaccion create(Transaccion transaccion, String directorioRoot, BigDecimal subDirectorio) {
-//       Modificar el objeto a guardar segun metadata automatica
+    public Transaccion create(Transaccion transaccion, Documento documento) {
+        Calendar fechaActual = Calendar.getInstance();
+        transaccion.setFechaTransaccion(fechaActual.getTime());
+        transaccion.setIdDocumento(documento);
         return transaccionRepository.save(transaccion);
     }
+
+    public Documento create(Documento documento, MultipartFile file, String ubicacion) {
+        Calendar fechaActual = Calendar.getInstance();
+        documento.setFechaCreacion(fechaActual.getTime());
+        documento.setNombreDoc(file.getOriginalFilename());
+        documento.setExtension(file.getContentType());
+//        if (documento.getAccesoPrivado()){
+//            documento.setAccesoPrivado(Boolean.TRUE);
+//        }
+        documento.setAccesoPrivado(Boolean.TRUE);
+        documento.setUrlDocumento(ubicacion);
+        return documentoRepository.save(documento);
+    }
+
+
+    public Transicion create(Transicion transicion) {
+        return transicionRepository.save(transicion);
+    }
+
+
+    public Transicion createTransicionUserCreador(Transaccion transaccionData, Usuario usuarioCreador) {
+
+        Transicion transicionCreacion = new Transicion();
+        transicionCreacion.setIdTransaccion(transaccionData);
+        transicionCreacion.setLoginUsuario(usuarioCreador);
+        transicionCreacion.setEstado("Creado");
+        transicionCreacion.setActivo(Boolean.FALSE);
+
+        return transicionRepository.save(transicionCreacion);
+    }
+
+    public Transicion createTransicionUserAsignado(Transaccion transaccionData, Usuario usuarioAsignado) {
+
+        Transicion transicionAsignacion = new Transicion();
+        transicionAsignacion.setIdTransaccion(transaccionData);
+        transicionAsignacion.setLoginUsuario(usuarioAsignado);
+        transicionAsignacion.setEstado("Asignado");
+        transicionAsignacion.setActivo(Boolean.TRUE);
+        create(transicionAsignacion);
+
+        return transicionRepository.save(transicionAsignacion);
+    }
+
 
     /**
      * Metodo para crear actualizar un registro del objeto Transaccion.
@@ -148,106 +119,85 @@ public class TransaccionService {
     public Transaccion findById(Long id) {
         return transaccionRepository.findByidTransaccion(id);
     }
-    
-    
-    /**
-     * Permite validar el formato del archivo que se esta adjuntando.
-     *
-     * @param contentType Tipo de contenido.
-     * @return {@code true} Si el tipo de contenido es válido (PDF, WORD,
-     * POWERPOINT, EXCEL, JPG, JPEG, PNG); de lo contrario, {@code false}.
-     */
-    private boolean isValidoContentType(String contentType) {
-        String[] validContentTypes = {"application/pdf",
-            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "image/jpeg", "image/jpg", "image/png"};
 
-        for (String validContentType : validContentTypes) {
-            if (contentType.equals(validContentType)) {
-                return true;
+    /**
+     * Metodo que permite modelar la estructura del directorio raiz donde se
+     * almacenaran los archivos.
+     *
+     * @param directorioRoot Directorio raiz definido en el application.properties
+     * @return Estructura definitiva del directorio que almacena los archivos.
+     */
+    public String generarEstructuraRoot(String directorioRoot){
+        LocalDate actual= LocalDate.now();
+        String directorio = directorioRoot+File.separator+actual.getYear();
+        return directorio;
+    }
+
+    /**
+     * Crea el directorio root y los subdirectorios validando
+     * previamente si existe o no.
+     *
+     * @param directorioRoot Directorio principal.
+     * @param subDirectorio Subdirectorio secundario.
+     */
+    public void crearDirectorios(String directorioRoot, String subDirectorio) {
+        boolean existeDirectorioRoot = validarExistenciaDirectorio(directorioRoot);
+        boolean existeSubDirectorio = validarExistenciaDirectorio(directorioRoot + File.separator + subDirectorio);
+        Path dirPathObj = Paths.get(directorioRoot);
+        Path sudDirPathObj = Paths.get(directorioRoot + File.separator + subDirectorio);
+
+        try {
+            if (!existeDirectorioRoot) {
+                Files.createDirectories(dirPathObj);
+                Files.createDirectories(sudDirPathObj);
             }
+
+            if (!existeSubDirectorio) {
+                Files.createDirectories(sudDirPathObj);
+            }
+        } catch (IOException ioExceptionObj) {
+            System.out.println("Se genero un problema al crear el directorio = " + ioExceptionObj.getMessage());
         }
-        return false;
     }
 
     /**
-     * Permite agregar varios documentos adjuntos, segun contentType permitidos
+     * Valida si un directorio existe.
      *
-     * @param files Archivos seleccionados.
-     * @param directorioRoot Directorio Principal.
-     * @param subDirectorioEvento Directorio Secundario.
-     * @throws IOException
+     * @param directorioValidar Directorio a evaluar.
+     * @return
      */
-    public void guardarMultiplesArchivos(List<MultipartFile> files, String directorioRoot, BigDecimal subDirectorioEvento) throws IOException {
-        for (MultipartFile file : files) {
-            guardarArchivo(file, directorioRoot, subDirectorioEvento);
-        }
+    public boolean validarExistenciaDirectorio(Object directorioValidar) {
+        return Files.exists(Paths.get(directorioValidar.toString()));
     }
 
     /**
-     * Metodo para guardar un archivo anexo en un directorios predeterminado.
+     * Metodo para guardar un archivo en un directorios predeterminado.
      *
      * @param file Archivo a guardar
      * @param directorioRoot Directorio Principal
-     * @param subDirectorioEvento Directorio Secundario
+     * @param subDirectorio Directorio Secundario
      * @throws IOException Se presenta en caso de errores de acceso
      */
-    private void guardarArchivo(MultipartFile file, String directorioRoot, BigDecimal subDirectorio) throws IOException {
-        Calendar fechaActual = Calendar.getInstance();
-        Documento documento = new Documento();
-
+    public String guardarArchivo(MultipartFile file, String directorioRoot, String subDirectorio) throws IOException {
         /*
-        * Valida si hay archivo seleccionado o si el seleccionado esta vacio.
+         * Valida si hay archivo seleccionado o si el seleccionado esta vacio.
          */
         if (file.isEmpty()) {
-            return;
+            return "No hay archivo...";
         }
 
         /*
-        * Valida si el Archivo seleccionado tiene un formato valido segun logica @code isValidoContentType.
-         */
-        if (!isValidoContentType(file.getContentType())) {
-            return;
-        }
-        //    OJO    indexar metadata del archivo a guardar
-
-        /*
-        * Numero Aleatorio para renombrar el archivo formato (numeroEvento+numeroAleatorio+extension)
-        * El archivo es almacenado en el directorio de destino sin extencion
+         * Numero Aleatorio para renombrar el archivo formato (nombreOriginal+numeroAleatorio+extension)
+         * El archivo es almacenado en el directorio de destino sin extencion
          */
         int numeroAleatorio = ThreadLocalRandom.current().nextInt(1, 1000);
-        String nuevoNombre = subDirectorio + "" + numeroAleatorio;
+        String nuevoNombre = numeroAleatorio + "" + file.getOriginalFilename();
+
         byte[] bytes = file.getBytes();
         Path path = Paths.get(directorioRoot + File.separator + subDirectorio + File.separator
                 + file.getOriginalFilename().replace(file.getOriginalFilename(), nuevoNombre));
         Files.write(path, bytes);
-//        anexo.setCodigo(nuevoNombre);
-//        anexo.setNombreFinal(nuevoNombre + "." + identificarExtencionAnexo(file));
-//        anexo.setUbicacionDisco(directorioRoot + File.separator + subDirectorioEvento);
-//        documentoService.create(anexo);
+        return path.toString();
     }
 
-    /**
-     * Metodo que identifica la metadata de la extension de un archivo.
-     *
-     * @param file Archivo a evaluar.
-     * @return Valor que identifica la extencion del archivo que recibio por
-     * parametro.
-     */
-    private String identificarExtencionAnexo(MultipartFile file) {
-        Map<String, String> listContentType = new HashMap<>();
-        listContentType.put("application/pdf", "pdf");
-        listContentType.put("application/msword", "doc");
-        listContentType.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx");
-        listContentType.put("application/vnd.ms-powerpoint", "ppt");
-        listContentType.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx");
-        listContentType.put("application/vnd.ms-excel", "xls");
-        listContentType.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
-        listContentType.put("image/jpeg", "jpeg");
-        listContentType.put("image/jpg", "jpg");
-        listContentType.put("image/png", "png");
-        return listContentType.get(file.getContentType());
-    }
 }

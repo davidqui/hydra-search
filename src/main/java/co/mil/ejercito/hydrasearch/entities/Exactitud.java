@@ -8,7 +8,6 @@ package co.mil.ejercito.hydrasearch.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,7 +45,7 @@ public class Exactitud implements Serializable {
     @NotNull
     @Column(name = "valor")
     private long valor;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idExactitud")
+    @OneToMany(mappedBy = "idExactitud")
     private Collection<Transaccion> transaccionCollection;
 
     public Exactitud() {

@@ -7,9 +7,7 @@ package co.mil.ejercito.hydrasearch.entities;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Objects;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,8 +41,8 @@ public class Clasificacion implements Serializable {
     @Size(min = 1, max = 60)
     @Column(name = "tipo")
     private String tipo;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idClasificacion")
-    private Collection<Transaccion> transaccionCollection;
+    @OneToMany(mappedBy = "idClasificacion")
+    private Collection<Documento> documentoCollection;
 
     public Clasificacion() {
     }
@@ -74,42 +72,29 @@ public class Clasificacion implements Serializable {
         this.tipo = tipo;
     }
 
-    public Collection<Transaccion> getTransaccionCollection() {
-        return transaccionCollection;
+    public Collection<Documento> getDocumentoCollection() {
+        return documentoCollection;
     }
 
-    public void setTransaccionCollection(Collection<Transaccion> transaccionCollection) {
-        this.transaccionCollection = transaccionCollection;
+    public void setDocumentoCollection(Collection<Documento> documentoCollection) {
+        this.documentoCollection = documentoCollection;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 73 * hash + Objects.hashCode(this.idClasificacion);
-        hash = 73 * hash + Objects.hashCode(this.tipo);
-        hash = 73 * hash + Objects.hashCode(this.transaccionCollection);
+        int hash = 0;
+        hash += (idClasificacion != null ? idClasificacion.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Clasificacion)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Clasificacion other = (Clasificacion) obj;
-        if (!Objects.equals(this.tipo, other.tipo)) {
-            return false;
-        }
-        if (!Objects.equals(this.idClasificacion, other.idClasificacion)) {
-            return false;
-        }
-        if (!Objects.equals(this.transaccionCollection, other.transaccionCollection)) {
+        Clasificacion other = (Clasificacion) object;
+        if ((this.idClasificacion == null && other.idClasificacion != null) || (this.idClasificacion != null && !this.idClasificacion.equals(other.idClasificacion))) {
             return false;
         }
         return true;
@@ -117,7 +102,7 @@ public class Clasificacion implements Serializable {
 
     @Override
     public String toString() {
-        return "Clasificacion{" + "idClasificacion=" + idClasificacion + ", tipo=" + tipo + '}';
+        return "co.mil.ejercito.hydrasearch.entities.Clasificacion[ idClasificacion=" + idClasificacion + " ]";
     }
-
+    
 }

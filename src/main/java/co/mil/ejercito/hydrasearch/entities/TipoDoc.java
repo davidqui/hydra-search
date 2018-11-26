@@ -8,7 +8,6 @@ package co.mil.ejercito.hydrasearch.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -42,7 +41,7 @@ public class TipoDoc implements Serializable {
     @Size(min = 1, max = 90)
     @Column(name = "tipo")
     private String tipo;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idTipoDoc")
+    @OneToMany(mappedBy = "idTipoDoc")
     private Collection<Documento> documentoCollection;
 
     public TipoDoc() {

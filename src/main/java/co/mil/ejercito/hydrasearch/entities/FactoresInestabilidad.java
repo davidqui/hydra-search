@@ -8,14 +8,15 @@ package co.mil.ejercito.hydrasearch.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -41,8 +42,8 @@ public class FactoresInestabilidad implements Serializable {
     @Size(min = 1, max = 70)
     @Column(name = "nombre")
     private String nombre;
-    @ManyToMany(mappedBy = "factoresInestabilidadCollection")
-    private Collection<Transaccion> transaccionCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idFactores")
+    private Collection<FactoresTransaccion> factoresTransaccionCollection;
 
     public FactoresInestabilidad() {
     }
@@ -72,12 +73,12 @@ public class FactoresInestabilidad implements Serializable {
         this.nombre = nombre;
     }
 
-    public Collection<Transaccion> getTransaccionCollection() {
-        return transaccionCollection;
+    public Collection<FactoresTransaccion> getFactoresTransaccionCollection() {
+        return factoresTransaccionCollection;
     }
 
-    public void setTransaccionCollection(Collection<Transaccion> transaccionCollection) {
-        this.transaccionCollection = transaccionCollection;
+    public void setFactoresTransaccionCollection(Collection<FactoresTransaccion> factoresTransaccionCollection) {
+        this.factoresTransaccionCollection = factoresTransaccionCollection;
     }
 
     @Override

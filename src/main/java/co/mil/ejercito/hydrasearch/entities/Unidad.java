@@ -7,7 +7,6 @@ package co.mil.ejercito.hydrasearch.entities;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -84,32 +83,19 @@ public class Unidad implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.idUnidad);
-        hash = 79 * hash + Objects.hashCode(this.unidad);
-        hash = 79 * hash + Objects.hashCode(this.usuarioCollection);
+        int hash = 0;
+        hash += (idUnidad != null ? idUnidad.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Unidad)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Unidad other = (Unidad) obj;
-        if (!Objects.equals(this.unidad, other.unidad)) {
-            return false;
-        }
-        if (!Objects.equals(this.idUnidad, other.idUnidad)) {
-            return false;
-        }
-        if (!Objects.equals(this.usuarioCollection, other.usuarioCollection)) {
+        Unidad other = (Unidad) object;
+        if ((this.idUnidad == null && other.idUnidad != null) || (this.idUnidad != null && !this.idUnidad.equals(other.idUnidad))) {
             return false;
         }
         return true;
@@ -117,7 +103,7 @@ public class Unidad implements Serializable {
 
     @Override
     public String toString() {
-        return "Unidad{" + "idUnidad=" + idUnidad + ", unidad=" + unidad + '}';
+        return "co.mil.ejercito.hydrasearch.entities.Unidad[ idUnidad=" + idUnidad + " ]";
     }
-
+    
 }

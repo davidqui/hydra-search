@@ -2,15 +2,7 @@ package co.mil.ejercito.hydrasearch.controller;
 
 //import static co.mil.ejercito.controller.ControllerInterface.MSG_ERROR;
 //import static co.mil.ejercito.controller.ControllerInterface.MSG_OK;
-import co.mil.ejercito.hydrasearch.entities.Amenaza;
-import co.mil.ejercito.hydrasearch.entities.Clasificacion;
-import co.mil.ejercito.hydrasearch.entities.Credibilidad;
-import co.mil.ejercito.hydrasearch.entities.Exactitud;
-import co.mil.ejercito.hydrasearch.entities.FactoresInestabilidad;
-import co.mil.ejercito.hydrasearch.entities.TipoDoc;
-import co.mil.ejercito.hydrasearch.entities.Transaccion;
-import co.mil.ejercito.hydrasearch.entities.Unidad;
-import co.mil.ejercito.hydrasearch.entities.Usuario;
+import co.mil.ejercito.hydrasearch.entities.*;
 import co.mil.ejercito.hydrasearch.services.AmenazaService;
 import co.mil.ejercito.hydrasearch.services.ClasificacionService;
 import co.mil.ejercito.hydrasearch.services.CredibilidadService;
@@ -24,6 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,83 +75,14 @@ public class TransaccionController {
      * 
      * @return Codigo de 13 digitos
      */
-    public BigDecimal generarCodigoSubDirectorio(){
+    public String generarCodigoSubDirectorio(){
         int numeroAleatorio = ThreadLocalRandom.current().nextInt(100, 999);
-        BigDecimal codigo=BigDecimal.valueOf(System.currentTimeMillis()+numeroAleatorio);
+        String codigo=String.valueOf(System.currentTimeMillis()+numeroAleatorio);
+        System.out.println("<<<<<<<Nombre del Subdirectorio = " + codigo);
         return codigo;
     }
-    
-    /**
-     * Metodo que permite mediante el modelo enviar a una vista el listado de los datos requeridos para el formulario.
-     * 
-     * @param model Apuntador Clase Model de Spring
-     * @return Vista ftl
-     */
-    @RequestMapping(path = "/index", method = RequestMethod.GET)
-    public String list(Model model) {
-        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "fechaTransaccion"));
-        List<Transaccion> transaccions = transaccionService.findAll(sort);
-        model.addAttribute("transacciones", transaccions);
-        
-        Sort sort1 = new Sort(new Sort.Order(Sort.Direction.DESC, "tipo"));
-        List<Amenaza> amenaza = amenazaService.findAll(sort1);
-        model.addAttribute("Amenazas", amenaza);
-        
-        Sort sort2 = new Sort(new Sort.Order(Sort.Direction.DESC, "tipo"));
-        List<Clasificacion> clasificacion = clasificacionService.findAll(sort2);
-        model.addAttribute("Clasificaciones", clasificacion);
-        
-        Sort sort3 = new Sort(new Sort.Order(Sort.Direction.DESC, "nombre"));
-        List<Credibilidad> credibilidad = credibilidadService.findAll(sort3);
-        model.addAttribute("Credibilidades", credibilidad);
-        
-        Sort sort4 = new Sort(new Sort.Order(Sort.Direction.DESC, "nombre"));
-        List<Exactitud> exactitud = exactitudService.findAll(sort4);
-        model.addAttribute("Exactitudes", exactitud);
-        
-        Sort sort5 = new Sort(new Sort.Order(Sort.Direction.DESC, "nombre"));
-        List<FactoresInestabilidad> FactoresInestabilidad = factEstabilidadService.findAll(sort5);
-        model.addAttribute("FactoresInestabilidad", FactoresInestabilidad);
-        
-        Sort sort6 = new Sort(new Sort.Order(Sort.Direction.DESC, "tipo"));
-        List<TipoDoc> tipoDoc = tipoDocService.findAll(sort6);
-        model.addAttribute("tipoDocs", tipoDoc);
-        
-        Sort sort7 = new Sort(new Sort.Order(Sort.Direction.DESC, "unidad"));
-        List<Unidad> unidad = unidadService.findAll(sort7);
-        model.addAttribute("Unidades", unidad);
-        
-        Sort sort8 = new Sort(new Sort.Order(Sort.Direction.DESC, "login"));
-        List<Usuario> usuario = usuarioService.findAll(sort8);
-        model.addAttribute("Usuarios", usuario);
-        
-        return "/index";
-    }
-    
-         
-    
-    /**
-     * Metodo que permite iterar entre el formulario de creacion y el de 
-     * actualizacion, carga en el modelo las diferentes relaciones que 
-     * tiene la entidad Evento con otras entidades. 
-     * 
-     * @param key Codigo PrimaryKey del Evento que se pretende actualizar.
-     * @param model Apuntador Clase Model Spring.
-     * @return Redirecciona ftl que contiene el formulario para crear o actualizar el evento.
-     */
-    
-//    @RequestMapping(value = {"/form", "/form/{key}"}, method = RequestMethod.GET)
-//    public String showForm(@PathVariable(value = "key", required = false) BigDecimal key, Model model) {
-//        
-//       
-//        
-//        boolean create = (key == null);
-//        if (!create) {
-//        Evento evento = eventoService.find(key);
-//            model.addAttribute("eventofor", evento);
-//        }
-//        return "/evento/evento-form";
-//    }
+
+
     
     /**
      * Metodo que permite guardar en la base de datos la totalidad 
@@ -169,19 +93,30 @@ public class TransaccionController {
      * @param files Lista de los archivos anexos que envia el formulario.
      * @return Redirecciona hacia ftl que lista la totalidad de los eventos creados.
      */
+//    @Transactional
     @RequestMapping(path = "/save", method = RequestMethod.POST)
-    public String saves(Transaccion transaccion, RedirectAttributes redirectAttributes, @RequestParam("archivo") List<MultipartFile> files) {
-         
-        BigDecimal subDirectorio = generarCodigoSubDirectorio();
-
-        String directorioFinal=transaccionService.generarEstructuraRoot(directorioRoot);
-        
-        Transaccion nuevo = transaccionService.create(transaccion, directorioFinal, subDirectorio);
-//        redirectAttributes.addFlashAttribute(MSG_OK, "Ha creado exitosamente el Evento No.: " + " "
-//                + nuevo.getId());
+    public String saves(Transaccion transaccion, Documento documento, Transicion transicion, String login, RedirectAttributes redirectAttributes, @RequestParam("docFile") MultipartFile files) {
         try {
-            transaccionService.crearDirectorios(directorioFinal, subDirectorio);
-            transaccionService.guardarMultiplesArchivos(files, directorioFinal, subDirectorio);
+        String subDirectorio = generarCodigoSubDirectorio();
+        String directorioFinal=transaccionService.generarEstructuraRoot(directorioRoot);
+        transaccionService.crearDirectorios(directorioFinal, subDirectorio);
+        String ubicacionFile=transaccionService.guardarArchivo(files, directorioFinal, subDirectorio);
+        Documento documentoData = transaccionService.create(documento, files, ubicacionFile);
+
+
+        Transaccion transaccionData= transaccionService.create(transaccion,documentoData);
+
+        Usuario usuarioCreador= new Usuario();
+        usuarioCreador.setLogin(login);
+        Usuario usuarioAsignado= new Usuario();
+        usuarioCreador.setLogin(transaccionData.getUsuarioValidador());
+        transaccionService.createTransicionUserCreador(transaccionData,usuarioCreador);
+        transaccionService.createTransicionUserAsignado(transaccionData, usuarioAsignado);
+
+////        redirectAttributes.addFlashAttribute(MSG_OK, "Ha creado exitosamente el Evento No.: " + " "
+////                + nuevo.getId());
+
+
         } catch (IOException ex) {
             Logger.getLogger(TransaccionController.class.getName()).log(Level.SEVERE, null, ex);
         }

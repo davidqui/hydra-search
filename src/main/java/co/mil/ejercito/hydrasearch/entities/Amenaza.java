@@ -8,16 +8,15 @@ package co.mil.ejercito.hydrasearch.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -43,11 +42,8 @@ public class Amenaza implements Serializable {
     @Size(min = 1, max = 60)
     @Column(name = "tipo")
     private String tipo;
-    @JoinTable(name = "AMENAZA_TRANSACCION", joinColumns = {
-        @JoinColumn(name = "id_amenaza", referencedColumnName = "id_amenaza")}, inverseJoinColumns = {
-        @JoinColumn(name = "id_transaccion", referencedColumnName = "id_transaccion")})
-    @ManyToMany
-    private Collection<Transaccion> transaccionCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idAmenaza")
+    private Collection<AmenazaTransaccion> amenazaTransaccionCollection;
 
     public Amenaza() {
     }
@@ -77,12 +73,12 @@ public class Amenaza implements Serializable {
         this.tipo = tipo;
     }
 
-    public Collection<Transaccion> getTransaccionCollection() {
-        return transaccionCollection;
+    public Collection<AmenazaTransaccion> getAmenazaTransaccionCollection() {
+        return amenazaTransaccionCollection;
     }
 
-    public void setTransaccionCollection(Collection<Transaccion> transaccionCollection) {
-        this.transaccionCollection = transaccionCollection;
+    public void setAmenazaTransaccionCollection(Collection<AmenazaTransaccion> amenazaTransaccionCollection) {
+        this.amenazaTransaccionCollection = amenazaTransaccionCollection;
     }
 
     @Override
