@@ -23,8 +23,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -56,7 +54,7 @@ public class Documento implements Serializable {
     @Size(max = 15)
     @Column(name = "extension")
     private String extension;
-    @Column(name = "acceso_privado", columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "acceso_privado")
     private Boolean accesoPrivado;
     @JoinColumn(name = "id_clasificacion", referencedColumnName = "id_clasificacion")
     @ManyToOne

@@ -1,35 +1,36 @@
 package co.mil.ejercito.hydrasearch.controller;
 
-//import static co.mil.ejercito.controller.ControllerInterface.MSG_ERROR;
-//import static co.mil.ejercito.controller.ControllerInterface.MSG_OK;
 import co.mil.ejercito.hydrasearch.entities.*;
+import co.mil.ejercito.hydrasearch.repositories.AmenazaRepository;
+import co.mil.ejercito.hydrasearch.repositories.AmenazaTransaccionRepository;
+import co.mil.ejercito.hydrasearch.repositories.FactEstabilidadRepository;
+import co.mil.ejercito.hydrasearch.repositories.FactorTransaccionRepository;
 import co.mil.ejercito.hydrasearch.services.AmenazaService;
 import co.mil.ejercito.hydrasearch.services.ClasificacionService;
 import co.mil.ejercito.hydrasearch.services.CredibilidadService;
+import co.mil.ejercito.hydrasearch.services.DocumentoService;
 import co.mil.ejercito.hydrasearch.services.ExactitudService;
 import co.mil.ejercito.hydrasearch.services.FactEstabilidadService;
 import co.mil.ejercito.hydrasearch.services.TipoDocService;
 import co.mil.ejercito.hydrasearch.services.TransaccionService;
+import co.mil.ejercito.hydrasearch.services.TransicionService;
 import co.mil.ejercito.hydrasearch.services.UnidadService;
 import co.mil.ejercito.hydrasearch.services.UsuarioService;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,7 +64,22 @@ public class TransaccionController {
     private CredibilidadService credibilidadService;
     @Autowired
     private ExactitudService exactitudService;
-        
+    @Autowired
+    private TransicionService transicionService;
+    @Autowired
+    private DocumentoService documentoService;
+
+
+    @Autowired
+    private AmenazaRepository amenazaRepository;
+    @Autowired
+    private FactEstabilidadRepository factEstabilidadRepository;
+    @Autowired
+    private AmenazaTransaccionRepository amenazaTransaccionRepository;
+    @Autowired
+    private FactorTransaccionRepository factorTransaccionRepository;
+
+
       
     @Value("${co.mil.ejercito.hydrasearch.archivos.root}")
     private String directorioRoot;
@@ -78,7 +94,6 @@ public class TransaccionController {
     public String generarCodigoSubDirectorio(){
         int numeroAleatorio = ThreadLocalRandom.current().nextInt(100, 999);
         String codigo=String.valueOf(System.currentTimeMillis()+numeroAleatorio);
-        System.out.println("<<<<<<<Nombre del Subdirectorio = " + codigo);
         return codigo;
     }
 
@@ -95,35 +110,67 @@ public class TransaccionController {
      */
 //    @Transactional
     @RequestMapping(path = "/save", method = RequestMethod.POST)
-    public String saves(Transaccion transaccion, Documento documento, Transicion transicion, String login, RedirectAttributes redirectAttributes, @RequestParam("docFile") MultipartFile files) {
+    public String saves(Transaccion transaccion, Documento documento, String login, RedirectAttributes redirectAttributes, @RequestParam("docFile") MultipartFile files) {
         try {
         String subDirectorio = generarCodigoSubDirectorio();
-        String directorioFinal=transaccionService.generarEstructuraRoot(directorioRoot);
-        transaccionService.crearDirectorios(directorioFinal, subDirectorio);
-        String ubicacionFile=transaccionService.guardarArchivo(files, directorioFinal, subDirectorio);
-        Documento documentoData = transaccionService.create(documento, files, ubicacionFile);
-
+        String directorioFinal=documentoService.generarEstructuraRoot(directorioRoot);
+        documentoService.crearDirectorios(directorioFinal, subDirectorio);
+        String ubicacionFile=documentoService.guardarArchivo(files, directorioFinal, subDirectorio);
+        Documento documentoData = documentoService.create(documento, files, ubicacionFile);
 
         Transaccion transaccionData= transaccionService.create(transaccion,documentoData);
 
-        Usuario usuarioCreador= new Usuario();
-        usuarioCreador.setLogin(login);
-        Usuario usuarioAsignado= new Usuario();
-        usuarioCreador.setLogin(transaccionData.getUsuarioValidador());
-        transaccionService.createTransicionUserCreador(transaccionData,usuarioCreador);
-        transaccionService.createTransicionUserAsignado(transaccionData, usuarioAsignado);
-
-////        redirectAttributes.addFlashAttribute(MSG_OK, "Ha creado exitosamente el Evento No.: " + " "
-////                + nuevo.getId());
-
+        Usuario usuarioCreador= usuarioService.findByLogin(login);
+        Usuario usuarioAsignado= usuarioService.findByLogin(transaccionData.getUsuarioValidador());
+        
+        transicionService.createTransicionUserCreador(transaccionData,usuarioCreador);
+        transicionService.createTransicionUserAsignado(transaccionData, usuarioAsignado);
 
         } catch (IOException ex) {
             Logger.getLogger(TransaccionController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return "redirect:/index";
+        return "/list";
     }
     
-      
+
+    @RequestMapping(path = "/list/{keylog}", method = RequestMethod.GET)
+    public ResponseEntity <List<Object>> list(@PathVariable("keylog") String login) {
+        System.out.println("<<<<<<<<<<Valor recibido  = >>>>>>>>>>>>>>" + login);
+        List<Object> transaccions = transaccionService.findAllByTransicionActivo(login);
+//        model.addAttribute("transacciones", transaccions);
+//        return "/transaccion/list";
+        return new ResponseEntity <> (transaccions,HttpStatus.OK);
+    }
+    
+    @RequestMapping(path = "/edit/{key}", method = RequestMethod.GET)
+    public ResponseEntity <TransaccionDTO> editarTrasaccion(@PathVariable("key") Long idTransaccion) {
+        TransaccionDTO transaccionDTO= new TransaccionDTO();
+
+        Transicion transicionData=transaccionService.findTransicionActiva(idTransaccion);
+
+        Transaccion transaccionData=transaccionService.findById(idTransaccion);
+
+        Documento documentoData=transaccionService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
+        
+        transaccionDTO.setIdTransaccion(idTransaccion);
+        transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
+        transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
+        transaccionDTO.setDescripcion(transaccionData.getDescripcion());
+        transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad());
+        transaccionDTO.setIdExactitud(transaccionData.getIdExactitud());
+        transaccionDTO.setEstado(transicionData.getEstado());
+        transaccionDTO.setActivo(transicionData.getActivo());
+        transaccionDTO.setLoginUsuario(transicionData.getLoginUsuario());
+        transaccionDTO.setIdDocumento(documentoData.getIdDocumento());
+        transaccionDTO.setUrlDocumento(documentoData.getUrlDocumento());
+        transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
+        transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
+        transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
+        
+        return new ResponseEntity <> (transaccionDTO,HttpStatus.OK);
+    }
+    
+    
     /**
      * Metodo que permite buscar un evento en especial por medio de su PrimaryKey.
      * 

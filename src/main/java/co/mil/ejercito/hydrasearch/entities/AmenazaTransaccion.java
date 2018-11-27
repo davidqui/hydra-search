@@ -9,14 +9,14 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -30,30 +30,30 @@ public class AmenazaTransaccion implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "id_transaccion")
-    private Long idTransaccion;
+    @Column(name = "id")
+    private Long id;
     @JoinColumn(name = "id_amenaza", referencedColumnName = "id_amenaza")
     @ManyToOne(optional = false)
     private Amenaza idAmenaza;
-    @JoinColumn(name = "id_transaccion", referencedColumnName = "id_transaccion", insertable = false, updatable = false)
-    @OneToOne(optional = false)
-    private Transaccion transaccion;
+    @JoinColumn(name = "id_transaccion", referencedColumnName = "id_transaccion")
+    @ManyToOne(optional = false)
+    private Transaccion idTransaccion;
 
     public AmenazaTransaccion() {
     }
 
-    public AmenazaTransaccion(Long idTransaccion) {
-        this.idTransaccion = idTransaccion;
+    public AmenazaTransaccion(Long id) {
+        this.id = id;
     }
 
-    public Long getIdTransaccion() {
-        return idTransaccion;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdTransaccion(Long idTransaccion) {
-        this.idTransaccion = idTransaccion;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Amenaza getIdAmenaza() {
@@ -64,18 +64,18 @@ public class AmenazaTransaccion implements Serializable {
         this.idAmenaza = idAmenaza;
     }
 
-    public Transaccion getTransaccion() {
-        return transaccion;
+    public Transaccion getIdTransaccion() {
+        return idTransaccion;
     }
 
-    public void setTransaccion(Transaccion transaccion) {
-        this.transaccion = transaccion;
+    public void setIdTransaccion(Transaccion idTransaccion) {
+        this.idTransaccion = idTransaccion;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idTransaccion != null ? idTransaccion.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -86,7 +86,7 @@ public class AmenazaTransaccion implements Serializable {
             return false;
         }
         AmenazaTransaccion other = (AmenazaTransaccion) object;
-        if ((this.idTransaccion == null && other.idTransaccion != null) || (this.idTransaccion != null && !this.idTransaccion.equals(other.idTransaccion))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -94,7 +94,7 @@ public class AmenazaTransaccion implements Serializable {
 
     @Override
     public String toString() {
-        return "co.mil.ejercito.hydrasearch.entities.AmenazaTransaccion[ idTransaccion=" + idTransaccion + " ]";
+        return "AmenazaTransaccion{" + "id=" + id + '}';
     }
-    
+
 }

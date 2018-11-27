@@ -35,14 +35,14 @@
             ------Datos de la Transaccion----------
             <br>
             Factor de Inestabilidad:
-            <select name="idFactores" id="idFactores">
+            <select name="factoresCollection" id="factoresCollection" multiple>
                 <#list factoresInestabilidad as factor>
                 <option value="${factor.idFactores}">${factor.nombre}</option>
                 </#list>
                 </select>
             <br>
             Amenaza o Area de Interes:
-            <select name="idAmenaza" id="idAmenaza">
+            <select name="amenazaCollection" id="amenazaCollection" multiple>
                 <#list amenazas as amenaza>
                 <option value="${amenaza.idAmenaza}">${amenaza.tipo}</option>
                 </#list>
@@ -83,6 +83,9 @@
                 </#list>
             </select>
             <br>
+                Nivel de Acceso:
+                <input type="checkbox" name="accesoPrivado" id="accesoPrivado" value="1">Privado
+                <br>
             <button type="submit">Guardar y Asignar</button>
             </form>
 

@@ -2,6 +2,7 @@ package co.mil.ejercito.hydrasearch.repositories;
 
 
 import co.mil.ejercito.hydrasearch.entities.Transicion;
+import co.mil.ejercito.hydrasearch.entities.Usuario;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface TransicionRepository extends JpaRepository<Transicion, Long>{
     public List<Transicion> findAll(Sort sort);
+    public Transicion findFirstByIdTransaccionAndActivoTrue(Long idTransaccion);
+//    public List<Transicion> findAllByLoginUsuarioAndActivoTrue(String loginUsuario);
 }

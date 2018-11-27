@@ -9,19 +9,22 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,7 +52,7 @@ public class Transaccion implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fechaTransaccion;
     @Column(name = "calificacion_calculada")
-    private BigInteger calificacionCalculada;
+    private Long calificacionCalculada;
     @Size(max = 255)
     @Column(name = "descripcion")
     private String descripcion;
@@ -65,10 +68,28 @@ public class Transaccion implements Serializable {
     @JoinColumn(name = "id_exactitud", referencedColumnName = "id_exactitud")
     @ManyToOne
     private Exactitud idExactitud;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "transaccion")
-    private AmenazaTransaccion amenazaTransaccion;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "transaccion")
-    private FactoresTransaccion factoresTransaccion;
+
+    //Relacion Mucho a Muchos
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
+    @JoinTable(name = "\"AMENAZA_TRANSACCION\"",
+            joinColumns = { @JoinColumn(name = "id_transaccion") },
+            inverseJoinColumns = { @JoinColumn(name = "id_amenaza") })
+    private Collection<Amenaza> amenazaCollection;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
+    @JoinTable(name = "\"FACTORES_TRANSACCION\"",
+            joinColumns = { @JoinColumn(name = "id_transaccion") },
+            inverseJoinColumns = { @JoinColumn(name = "id_factores") })
+    private Collection<FactoresInestabilidad> factoresCollection;
+
     @OneToMany(mappedBy = "idTransaccion")
     private Collection<Transicion> transicionCollection;
 
@@ -95,11 +116,11 @@ public class Transaccion implements Serializable {
         this.fechaTransaccion = fechaTransaccion;
     }
 
-    public BigInteger getCalificacionCalculada() {
+    public Long getCalificacionCalculada() {
         return calificacionCalculada;
     }
 
-    public void setCalificacionCalculada(BigInteger calificacionCalculada) {
+    public void setCalificacionCalculada(Long calificacionCalculada) {
         this.calificacionCalculada = calificacionCalculada;
     }
 
@@ -143,28 +164,28 @@ public class Transaccion implements Serializable {
         this.idExactitud = idExactitud;
     }
 
-    public AmenazaTransaccion getAmenazaTransaccion() {
-        return amenazaTransaccion;
-    }
-
-    public void setAmenazaTransaccion(AmenazaTransaccion amenazaTransaccion) {
-        this.amenazaTransaccion = amenazaTransaccion;
-    }
-
-    public FactoresTransaccion getFactoresTransaccion() {
-        return factoresTransaccion;
-    }
-
-    public void setFactoresTransaccion(FactoresTransaccion factoresTransaccion) {
-        this.factoresTransaccion = factoresTransaccion;
-    }
-
     public Collection<Transicion> getTransicionCollection() {
         return transicionCollection;
     }
 
     public void setTransicionCollection(Collection<Transicion> transicionCollection) {
         this.transicionCollection = transicionCollection;
+    }
+
+    public Collection<Amenaza> getAmenazaCollection() {
+        return amenazaCollection;
+    }
+
+    public void setAmenazaCollection(Collection<Amenaza> amenazaCollection) {
+        this.amenazaCollection = amenazaCollection;
+    }
+
+    public Collection<FactoresInestabilidad> getFactoresCollection() {
+        return factoresCollection;
+    }
+
+    public void setFactoresCollection(Collection<FactoresInestabilidad> factoresCollection) {
+        this.factoresCollection = factoresCollection;
     }
 
     @Override

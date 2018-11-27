@@ -1,6 +1,8 @@
 package co.mil.ejercito.hydrasearch.services;
 
+import co.mil.ejercito.hydrasearch.entities.Transaccion;
 import co.mil.ejercito.hydrasearch.entities.Transicion;
+import co.mil.ejercito.hydrasearch.entities.Usuario;
 import co.mil.ejercito.hydrasearch.repositories.TransicionRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,40 @@ public class TransicionService {
      */
     public List <Transicion> findAll(Sort sort) {
         return transicionRepository.findAll(sort);
+    }
+    
+    /**
+     * Permite crear un registro de instancia, que determina quien fue el usario creador del registro.
+     * @param transaccionData Informacion del objeto transicion.
+     * @param usuarioCreador Informacion del objeto usuario que crea.
+     * @return Informacion del registro creado.
+     */
+    public Transicion createTransicionUserCreador(Transaccion transaccionData, Usuario usuarioCreador) {
+
+        Transicion transicionCreacion = new Transicion();
+        transicionCreacion.setIdTransaccion(transaccionData);
+        transicionCreacion.setLoginUsuario(usuarioCreador);
+        transicionCreacion.setEstado("Creado");
+        transicionCreacion.setActivo(Boolean.FALSE);
+
+        return transicionRepository.save(transicionCreacion);
+    }
+    
+    /**
+     * Permite crear un registro de instancia, que determina a que usuario le es asigando el documento.
+     * @param transaccionData Informacion del objeto transicion.
+     * @param usuarioAsignado Informacion del objeto usuario al que se le asigna.
+     * @return Informacion del registro creado.
+     */
+    public Transicion createTransicionUserAsignado(Transaccion transaccionData, Usuario usuarioAsignado) {
+
+        Transicion transicionAsignacion = new Transicion();
+        transicionAsignacion.setIdTransaccion(transaccionData);
+        transicionAsignacion.setLoginUsuario(usuarioAsignado);
+        transicionAsignacion.setEstado("Asignado");
+        transicionAsignacion.setActivo(Boolean.TRUE);
+
+        return transicionRepository.save(transicionAsignacion);
     }
     
 }

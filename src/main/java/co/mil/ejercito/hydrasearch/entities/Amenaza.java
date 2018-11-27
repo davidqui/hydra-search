@@ -7,6 +7,7 @@ package co.mil.ejercito.hydrasearch.entities;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -43,7 +44,7 @@ public class Amenaza implements Serializable {
     @Column(name = "tipo")
     private String tipo;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idAmenaza")
-    private Collection<AmenazaTransaccion> amenazaTransaccionCollection;
+    private Collection <AmenazaTransaccion> amenazaTransaccionCollection;
 
     public Amenaza() {
     }
