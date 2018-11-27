@@ -144,9 +144,11 @@ public class TransaccionController {
     
     @RequestMapping(path = "/edit/{key}", method = RequestMethod.GET)
     public ResponseEntity <TransaccionDTO> editarTrasaccion(@PathVariable("key") Long idTransaccion) {
+
         TransaccionDTO transaccionDTO= new TransaccionDTO();
 
-        Transicion transicionData=transaccionService.findTransicionActiva(idTransaccion);
+        Transaccion transaccionOne=transaccionService.findById(idTransaccion);
+        Transicion transicionData=transaccionService.findTransicionActiva(transaccionOne);
 
         Transaccion transaccionData=transaccionService.findById(idTransaccion);
 
@@ -156,17 +158,19 @@ public class TransaccionController {
         transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
         transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
         transaccionDTO.setDescripcion(transaccionData.getDescripcion());
-        transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad());
-        transaccionDTO.setIdExactitud(transaccionData.getIdExactitud());
+        transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad().getIdCredibilidad());
+        transaccionDTO.setIdExactitud(transaccionData.getIdExactitud().getIdExactitud());
         transaccionDTO.setEstado(transicionData.getEstado());
         transaccionDTO.setActivo(transicionData.getActivo());
-        transaccionDTO.setLoginUsuario(transicionData.getLoginUsuario());
+        transaccionDTO.setLoginUsuario(transicionData.getLoginUsuario().getLogin());
         transaccionDTO.setIdDocumento(documentoData.getIdDocumento());
         transaccionDTO.setUrlDocumento(documentoData.getUrlDocumento());
         transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
-        transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
-        transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
-        
+        transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion().getIdClasificacion());
+        transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc().getIdTipoDoc());
+//        transaccionDTO.setFactoresCollection(transaccionData);
+//        transaccionDTO.setAmenazaCollection(transaccionData.getFactoresCollection());
+
         return new ResponseEntity <> (transaccionDTO,HttpStatus.OK);
     }
     

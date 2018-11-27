@@ -81,8 +81,9 @@ public class TransaccionService {
         return transaccionRepository.ListTrasicionesActivas(login);
     }
     
-    public Transicion findTransicionActiva(Long idTransaccion) {
-        return transicionRepository.findFirstByIdTransaccionAndActivoTrue(idTransaccion);
+    public Transicion findTransicionActiva(Transaccion idTransaccion) {
+        return transicionRepository.findByIdTransaccionAndActivoTrue(idTransaccion);
+
     }
     
 //    public List<Transicion> findAllByLoginAndActivo(String loginUsuario) {
