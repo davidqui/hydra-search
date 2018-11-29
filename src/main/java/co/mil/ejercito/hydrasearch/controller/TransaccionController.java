@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
@@ -76,7 +78,6 @@ public class TransaccionController {
     private FactorTransaccionRepository factorTransaccionRepository;
 
 
-      
     @Value("${co.mil.ejercito.hydrasearch.archivos.root}")
     private String directorioRoot;
     
@@ -94,19 +95,18 @@ public class TransaccionController {
     }
 
 
-    
     /**
      * Metodo que permite guardar en la base de datos la totalidad 
      * de los datos que requiere un evento.
      * 
      * @param transaccion Objeto Evento modelado con los datos del formulario.
-     * @param redirectAttributes Apuntador Clase Spring.
+//     * @param redirectAttributes Apuntador Clase Spring.
      * @param files Lista de los archivos anexos que envia el formulario.
      * @return Redirecciona hacia ftl que lista la totalidad de los eventos creados.
      */
-//    @Transactional
+    @Transactional
     @RequestMapping(path = "/save", method = RequestMethod.POST)
-    public String saves(Transaccion transaccion, Documento documento, String login, RedirectAttributes redirectAttributes, @RequestParam("docFile") MultipartFile files) {
+    public String saves(Transaccion transaccion, Documento documento, String login, @RequestParam("docFile") MultipartFile files) {
         try {
         String subDirectorio = generarCodigoSubDirectorio();
         String directorioFinal=documentoService.generarEstructuraRoot(directorioRoot);
@@ -121,33 +121,61 @@ public class TransaccionController {
         
         transicionService.createTransicionUserCreador(transaccionData,usuarioCreador);
         transicionService.createTransicionUserAsignado(transaccionData, usuarioAsignado);
-
+        String confirmacion=documentoData.getNombreDoc()+""+"ha sido guardado";
+            return confirmacion;
         } catch (IOException ex) {
             Logger.getLogger(TransaccionController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return "/list";
-    }
-    
 
-    @RequestMapping(path = "/list/{keylog}", method = RequestMethod.GET)
-    public ResponseEntity <List<Object>> list(@PathVariable("keylog") String login) {
-        System.out.println("<<<<<<<<<<Valor recibido  = >>>>>>>>>>>>>>" + login);
-        List<Object> transaccions = transaccionService.findAllByTransicionActivo(login);
-//        model.addAttribute("transacciones", transaccions);
-//        return "/transaccion/list";
-        return new ResponseEntity <> (transaccions,HttpStatus.OK);
+
+        return "/index";
     }
-    
+
+    /**
+     * Lista todas las transacciones que un usuario tiene asignada.
+     * @param login Nombre del Usuario a consultar.
+     * @return Lista del  Objeto DTO que modela los datos asociados al nombre de usuario consultado.
+     */
+    @RequestMapping(path = "/list/{keylog}", method = RequestMethod.GET)
+    public ResponseEntity <List<TransaccionDTO>> list(@PathVariable("keylog") String login) {
+        Usuario usuarioData=usuarioService.findByLogin(login);
+        List<Transicion> listTransiciones=transicionService.findTransicionByUsuario(usuarioData);
+        List<TransaccionDTO> listDTO= new ArrayList<>();
+        for (Transicion transiciones:listTransiciones) {
+            Transaccion transaccionData=transaccionService.findById(transiciones.getIdTransaccion().getIdTransaccion());
+            Documento documentoData=documentoService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
+            TransaccionDTO transaccionDTO= new TransaccionDTO();
+            transaccionDTO.setIdTransaccion(transaccionData.getIdTransaccion());
+            transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
+            transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
+            transaccionDTO.setDescripcion(transaccionData.getDescripcion());
+            transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad());
+            transaccionDTO.setIdExactitud(transaccionData.getIdExactitud());
+            transaccionDTO.setIdDocumento(transaccionData.getIdDocumento().getIdDocumento());
+            transaccionDTO.setNombreDoc(documentoData.getNombreDoc());
+            transaccionDTO.setUrlDocumento(documentoData.getUrlDocumento());
+            transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
+            transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
+            transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
+            listDTO.add(transaccionDTO);
+        }
+
+        return new ResponseEntity <> (listDTO,HttpStatus.OK);
+    }
+
+    /**
+     * Permite consultar los datos de una transaccion especifica.
+     * @param idTransaccion Id de la transaccion a consultar.
+     * @return Objeto DTO con la informacion de la transaccion consultada.
+     */
     @RequestMapping(path = "/edit/{key}", method = RequestMethod.GET)
     public ResponseEntity <TransaccionDTO> editarTrasaccion(@PathVariable("key") Long idTransaccion) {
 
         TransaccionDTO transaccionDTO= new TransaccionDTO();
 
         Transaccion transaccionOne=transaccionService.findById(idTransaccion);
-        Transicion transicionData=transaccionService.findTransicionActiva(transaccionOne);
-
+        Transicion transicionData=transicionService.findTransicionActiva(transaccionOne);
         Transaccion transaccionData=transaccionService.findById(idTransaccion);
-
         Documento documentoData=documentoService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
         
         transaccionDTO.setIdTransaccion(idTransaccion);
@@ -171,19 +199,7 @@ public class TransaccionController {
         return new ResponseEntity <> (transaccionDTO,HttpStatus.OK);
     }
     
-    /**
-     * Metodo que permite buscar un evento en especial por medio de su PrimaryKey.
-     * 
-     * @param id PrimaryKey del Evento
-     * @param model Apuntador Clase Model Spring
-     * @return Redirecciona hacia ftl que visualiza la informacion de determinado evento.
-     */
-    @RequestMapping(path = "/view/{id}", method = RequestMethod.GET)
-    public String view(@PathVariable("id") Long id, Model model) {
-        Transaccion transaccion = transaccionService.findById(id);
-        return "/index";
-    }
-    
+
     /**
      * Metodo que permite descargar un archivo.
      * 

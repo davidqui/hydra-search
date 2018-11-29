@@ -67,33 +67,12 @@ public class TransaccionService {
     }
     
     /**
-     * Busca una transaccion por su clave primaria
-     * 
-     * @param id
-     * @return 
+     * Permite buscar una transaccion por su clave primaria.
+     * @param id ID de la clasificacion a buscar.
+     * @return Datos de la transaccion consultada.
      */
     public Transaccion findById(Long id) {
         return transaccionRepository.findByidTransaccion(id);
     }
-    
-    
-    public List<Object> findAllByTransicionActivo(String login) {
-        return transaccionRepository.ListTrasicionesActivas(login);
-    }
-    
-    public Transicion findTransicionActiva(Transaccion idTransaccion) {
-        return transicionRepository.findByIdTransaccionAndActivoTrue(idTransaccion);
 
-    }
-    
-//    public List<Transicion> findAllByLoginAndActivo(String loginUsuario) {
-//        return transicionRepository.findAllByLoginUsuarioAndActivoTrue(loginUsuario);
-//    }
-    
-//    public Transaccion findOneTransaccion(Long idTransaccion) {
-//        return transaccionRepository.findOneByIdTransaccion(idTransaccion);
-//    }
-    
-
-    
 }

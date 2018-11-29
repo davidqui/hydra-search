@@ -51,7 +51,7 @@ public class Documento implements Serializable {
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fechaCreacion;
-    @Size(max = 15)
+    @Size(max = 100)
     @Column(name = "extension")
     private String extension;
     @Column(name = "acceso_privado")

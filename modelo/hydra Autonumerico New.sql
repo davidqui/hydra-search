@@ -49,7 +49,7 @@ CREATE TABLE "DOCUMENTO" (
 "nombre_doc" varchar(60) NOT NULL,
 "url_documento" text NOT NULL,
 "fecha_creacion" date NOT NULL,
-"extension" varchar(15) NOT NULL,
+"extension" varchar(100) NOT NULL,
 "acceso_privado" int2 NOT NULL,
 PRIMARY KEY ("id_documento") 
 )

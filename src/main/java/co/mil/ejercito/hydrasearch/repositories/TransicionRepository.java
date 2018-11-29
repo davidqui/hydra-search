@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TransicionRepository extends JpaRepository<Transicion, Long> {
     public List<Transicion> findAll(Sort sort);
 
-    public Transicion findFirstByIdTransaccionAndActivoTrue(Long idTransaccion);
-
     public Transicion findByIdTransaccionAndActivoTrue(Transaccion idTransaccion);
+
+    public List <Transicion> findByLoginUsuarioAndActivoTrue(Usuario login);
 
 }

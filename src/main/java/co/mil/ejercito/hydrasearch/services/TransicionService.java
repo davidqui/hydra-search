@@ -15,17 +15,17 @@ public class TransicionService {
 
     @Autowired
     private TransicionRepository transicionRepository;
-    
+
     /**
      * Metodo para listar todos los registros disponibles...
-     * 
+     *
      * @param sort Criterio de ordenamiento
      * @return Lista de Objetos Transicion
      */
     public List <Transicion> findAll(Sort sort) {
         return transicionRepository.findAll(sort);
     }
-    
+
     /**
      * Permite crear un registro de instancia, que determina quien fue el usario creador del registro.
      * @param transaccionData Informacion del objeto transicion.
@@ -42,7 +42,7 @@ public class TransicionService {
 
         return transicionRepository.save(transicionCreacion);
     }
-    
+
     /**
      * Permite crear un registro de instancia, que determina a que usuario le es asigando el documento.
      * @param transaccionData Informacion del objeto transicion.
@@ -59,5 +59,26 @@ public class TransicionService {
 
         return transicionRepository.save(transicionAsignacion);
     }
-    
+
+    /**
+     * Permite buscar una transicion activa por Id de Transacción.
+     * @param idTransaccion Identificador de la transaccion.
+     * @return Data de la transicion Activa que corresponde al Id de Transaccion indicado.
+     */
+    public Transicion findTransicionActiva(Transaccion idTransaccion) {
+        return transicionRepository.findByIdTransaccionAndActivoTrue(idTransaccion);
+
+    }
+
+    /**
+     * Permite listar las transacciones asignadas a un usuario por su login.
+     * @param login Nombre de usuario a consultar.
+     * @return Lista de Transiciones asignadas al usuario que posea dicho login.
+     */
+    public List <Transicion> findTransicionByUsuario(Usuario login) {
+        return transicionRepository.findByLoginUsuarioAndActivoTrue(login);
+
+    }
+
+
 }

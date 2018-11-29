@@ -149,9 +149,9 @@ public class RestController {
      */
     @RequestMapping(path = "", method = RequestMethod.GET)
     public String list(Model model) {
-        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "fechaTransaccion"));
-        List<Transaccion> transaccions = transaccionService.findAll(sort);
-        model.addAttribute("transacciones", transaccions);
+//        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "fechaTransaccion"));
+//        List<Transaccion> transaccions = transaccionService.findAll(sort);
+//        model.addAttribute("transacciones", transaccions);
 
         Sort sort1 = new Sort(new Sort.Order(Sort.Direction.DESC, "tipo"));
         List<Amenaza> amenaza = amenazaService.findAll(sort1);
@@ -185,7 +185,7 @@ public class RestController {
         List<Usuario> usuario = usuarioService.findAllByUnidad(sort8);
         model.addAttribute("usuarios", usuario);
 
-        return "/index";
+        return "index";
     }
     
 }
