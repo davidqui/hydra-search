@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -42,6 +44,7 @@ public class FactoresInestabilidad implements Serializable {
     @Size(min = 1, max = 70)
     @Column(name = "nombre")
     private String nombre;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idFactores")
     private Collection<FactoresTransaccion> factoresTransaccionCollection;
 

@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -41,6 +43,7 @@ public class TipoDoc implements Serializable {
     @Size(min = 1, max = 90)
     @Column(name = "tipo")
     private String tipo;
+    @JsonIgnore
     @OneToMany(mappedBy = "idTipoDoc")
     private Collection<Documento> documentoCollection;
 

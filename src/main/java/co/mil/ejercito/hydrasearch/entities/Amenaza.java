@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +45,7 @@ public class Amenaza implements Serializable {
     @Size(min = 1, max = 60)
     @Column(name = "tipo")
     private String tipo;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idAmenaza")
     private Collection <AmenazaTransaccion> amenazaTransaccionCollection;
 

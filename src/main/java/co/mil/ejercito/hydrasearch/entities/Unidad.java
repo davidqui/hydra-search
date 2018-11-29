@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -42,6 +44,7 @@ public class Unidad implements Serializable {
     @Size(min = 1, max = 60)
     @Column(name = "unidad")
     private String unidad;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUnidad")
     private Collection<Usuario> usuarioCollection;
 

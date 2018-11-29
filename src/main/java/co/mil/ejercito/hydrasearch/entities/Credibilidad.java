@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -45,6 +47,7 @@ public class Credibilidad implements Serializable {
     @NotNull
     @Column(name = "valor")
     private long valor;
+    @JsonIgnore
     @OneToMany(mappedBy = "idCredibilidad")
     private Collection<Transaccion> transaccionCollection;
 

@@ -5,6 +5,8 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -53,6 +55,7 @@ public class Usuario implements Serializable {
     @JoinColumn(name = "id_unidad", referencedColumnName = "id_unidad")
     @ManyToOne(optional = false)
     private Unidad idUnidad;
+    @JsonIgnore
     @OneToMany(mappedBy = "loginUsuario")
     private Collection<Transicion> transicionCollection;
 
