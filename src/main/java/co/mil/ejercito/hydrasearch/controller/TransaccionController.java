@@ -5,34 +5,30 @@ import co.mil.ejercito.hydrasearch.repositories.AmenazaRepository;
 import co.mil.ejercito.hydrasearch.repositories.AmenazaTransaccionRepository;
 import co.mil.ejercito.hydrasearch.repositories.FactEstabilidadRepository;
 import co.mil.ejercito.hydrasearch.repositories.FactorTransaccionRepository;
-import co.mil.ejercito.hydrasearch.services.AmenazaService;
-import co.mil.ejercito.hydrasearch.services.ClasificacionService;
-import co.mil.ejercito.hydrasearch.services.CredibilidadService;
-import co.mil.ejercito.hydrasearch.services.DocumentoService;
-import co.mil.ejercito.hydrasearch.services.ExactitudService;
-import co.mil.ejercito.hydrasearch.services.FactEstabilidadService;
-import co.mil.ejercito.hydrasearch.services.TipoDocService;
-import co.mil.ejercito.hydrasearch.services.TransaccionService;
-import co.mil.ejercito.hydrasearch.services.TransicionService;
-import co.mil.ejercito.hydrasearch.services.UnidadService;
-import co.mil.ejercito.hydrasearch.services.UsuarioService;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Logger;
+import co.mil.ejercito.hydrasearch.services.*;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Controlador para {@link Transaccion}.
@@ -152,28 +148,28 @@ public class TransaccionController {
 
         Transaccion transaccionData=transaccionService.findById(idTransaccion);
 
-        Documento documentoData=transaccionService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
+        Documento documentoData=documentoService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
         
         transaccionDTO.setIdTransaccion(idTransaccion);
         transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
         transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
         transaccionDTO.setDescripcion(transaccionData.getDescripcion());
-        transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad().getIdCredibilidad());
-        transaccionDTO.setIdExactitud(transaccionData.getIdExactitud().getIdExactitud());
+        transaccionDTO.setIdCredibilidad(transaccionData.getIdCredibilidad());
+        transaccionDTO.setIdExactitud(transaccionData.getIdExactitud());
         transaccionDTO.setEstado(transicionData.getEstado());
         transaccionDTO.setActivo(transicionData.getActivo());
-        transaccionDTO.setLoginUsuario(transicionData.getLoginUsuario().getLogin());
+        transaccionDTO.setLoginUsuario(transicionData.getLoginUsuario());
         transaccionDTO.setIdDocumento(documentoData.getIdDocumento());
+        transaccionDTO.setNombreDoc(documentoData.getNombreDoc());
         transaccionDTO.setUrlDocumento(documentoData.getUrlDocumento());
         transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
-        transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion().getIdClasificacion());
-        transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc().getIdTipoDoc());
+        transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
+        transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
 //        transaccionDTO.setFactoresCollection(transaccionData);
 //        transaccionDTO.setAmenazaCollection(transaccionData.getFactoresCollection());
 
         return new ResponseEntity <> (transaccionDTO,HttpStatus.OK);
     }
-    
     
     /**
      * Metodo que permite buscar un evento en especial por medio de su PrimaryKey.
@@ -189,42 +185,27 @@ public class TransaccionController {
     }
     
     /**
-     * Metodo que permite descargar un archivo anexo al evento.
+     * Metodo que permite descargar un archivo.
      * 
      * @param response Representa la respuesta del servidor
      * @param codigo Valor recibido desde el formulario que contiene el numero que identifica el archivo
      * @throws IOException 
      */
-//    @RequestMapping(path = "/descargar/{codigo}", method = RequestMethod.GET)
-//    public void descargarArchivo(HttpServletResponse response,@PathVariable("codigo") String codigo) throws IOException {
-//        Documento anexoData=anexoService.find(codigo);
-//        try {
-//            String nombreFichero = codigo;
-//            String subDirectorio = anexoData.getUbicacionDisco();
-//            response.setContentType(anexoData.getContentType());
-//            response.setHeader("Content-Disposition", "attachment; filename=\""
-//                    + nombreFichero.replace(nombreFichero, anexoData.getNombreFinal())+ "\"");
-//            InputStream archivoLeido = new FileInputStream(subDirectorio+File.separator+nombreFichero);
-//            IOUtils.copy(archivoLeido, response.getOutputStream());
-//            response.flushBuffer();
-//        } catch (IOException ex) {
-//            throw ex;
-//        }
-//    }
-    
-        
-    /**
-     * Metodo para mostrar por consola la informacion que esta enviando un formulario.
-     * Depende de la clase ControllerUtilities
-     * @param request
-     * @return 
-     */
-//    @RequestMapping(path = "/util", method = RequestMethod.POST)
-//    public String savee(HttpServletRequest request) {
-//        String params = ControllerUtilities.viewHTTPParameters(request);
-//        LOG.info(params);
-//        return "valorCualquiera";
-//    }
-      
-    
+    @RequestMapping(path = "/descargar/{codigo}", method = RequestMethod.GET)
+    public void descargarArchivo(HttpServletResponse response, @PathVariable("codigo") Long codigo) throws IOException {
+        Documento documentoData=documentoService.findOneDocumento(codigo);
+        try {
+            String nombreFichero = documentoData.getNombreDoc();
+            String url = documentoData.getUrlDocumento();
+            response.setContentType(documentoData.getExtension());
+            response.setHeader("Content-Disposition", "attachment; filename=\""
+                    + url.replace(url,nombreFichero)+ "\"");
+            InputStream archivoLeido = new FileInputStream(url);
+            IOUtils.copy(archivoLeido, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            throw ex;
+        }
+    }
+
 }

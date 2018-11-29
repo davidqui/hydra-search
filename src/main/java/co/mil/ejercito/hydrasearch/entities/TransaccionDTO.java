@@ -5,8 +5,13 @@
  */
 package co.mil.ejercito.hydrasearch.entities;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -23,39 +28,39 @@ public class TransaccionDTO {
 //    Campos Transaccion
     @Id
     private Long idTransaccion;
+    @Temporal(TemporalType.TIMESTAMP)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fechaTransaccion;
     private Long calificacionCalculada;
     private String descripcion;
-    private Long idCredibilidad;
-    private Long idExactitud;
-    private Amenaza amenazaCollection;
-    private FactoresInestabilidad factoresCollection;
+    private Credibilidad idCredibilidad;
+    private Exactitud idExactitud;
+//    private Collection <Amenaza> amenazaCollection;
+//    private Collection <FactoresInestabilidad> factoresCollection;
 
 //    Campos Trasicion
     private String estado;
     private Boolean activo;
-    private String loginUsuario;
+    private Usuario loginUsuario;
     
 //    Campos Documento
     private Long idDocumento;
     private String nombreDoc;
     private String urlDocumento;
     private Boolean accesoPrivado;
-    private Long idClasificacion;
-    private Long idTipoDoc;
+    private Clasificacion idClasificacion;
+    private TipoDoc idTipoDoc;
 
     public TransaccionDTO() {
     }
 
-    public TransaccionDTO(Long idTransaccion, Date fechaTransaccion, Long calificacionCalculada, String descripcion, Long idCredibilidad, Long idExactitud, Amenaza amenazaCollection, FactoresInestabilidad factoresCollection, String estado, Boolean activo, String loginUsuario, Long idDocumento, String nombreDoc, String urlDocumento, Boolean accesoPrivado, Long idClasificacion, Long idTipoDoc) {
+    public TransaccionDTO(Long idTransaccion, Date fechaTransaccion, Long calificacionCalculada, String descripcion, Credibilidad idCredibilidad, Exactitud idExactitud, String estado, Boolean activo, Usuario loginUsuario, Long idDocumento, String nombreDoc, String urlDocumento, Boolean accesoPrivado, Clasificacion idClasificacion, TipoDoc idTipoDoc) {
         this.idTransaccion = idTransaccion;
         this.fechaTransaccion = fechaTransaccion;
         this.calificacionCalculada = calificacionCalculada;
         this.descripcion = descripcion;
         this.idCredibilidad = idCredibilidad;
         this.idExactitud = idExactitud;
-        this.amenazaCollection = amenazaCollection;
-        this.factoresCollection = factoresCollection;
         this.estado = estado;
         this.activo = activo;
         this.loginUsuario = loginUsuario;
@@ -99,53 +104,20 @@ public class TransaccionDTO {
         this.descripcion = descripcion;
     }
 
-    public Long getIdCredibilidad() {
+    public Credibilidad getIdCredibilidad() {
         return idCredibilidad;
     }
 
-    public void setIdCredibilidad(Long idCredibilidad) {
+    public void setIdCredibilidad(Credibilidad idCredibilidad) {
         this.idCredibilidad = idCredibilidad;
     }
 
-    public Long getIdExactitud() {
+    public Exactitud getIdExactitud() {
         return idExactitud;
     }
 
-    public void setIdExactitud(Long idExactitud) {
+    public void setIdExactitud(Exactitud idExactitud) {
         this.idExactitud = idExactitud;
-    }
-
-//    public Collection<Amenaza> getAmenazaCollection() {
-//        return amenazaCollection;
-//    }
-
-//    public void setAmenazaCollection(Collection<Amenaza> amenazaCollection) {
-//        this.amenazaCollection = amenazaCollection;
-//    }
-
-//    public Collection<FactoresInestabilidad> getFactoresCollection() {
-//        return factoresCollection;
-//    }
-//
-//    public void setFactoresCollection(Collection<FactoresInestabilidad> factoresCollection) {
-//        this.factoresCollection = factoresCollection;
-//    }
-
-
-    public Amenaza getAmenazaCollection() {
-        return amenazaCollection;
-    }
-
-    public void setAmenazaCollection(Amenaza amenazaCollection) {
-        this.amenazaCollection = amenazaCollection;
-    }
-
-    public FactoresInestabilidad getFactoresCollection() {
-        return factoresCollection;
-    }
-
-    public void setFactoresCollection(FactoresInestabilidad factoresCollection) {
-        this.factoresCollection = factoresCollection;
     }
 
     public String getEstado() {
@@ -164,11 +136,11 @@ public class TransaccionDTO {
         this.activo = activo;
     }
 
-    public String getLoginUsuario() {
+    public Usuario getLoginUsuario() {
         return loginUsuario;
     }
 
-    public void setLoginUsuario(String loginUsuario) {
+    public void setLoginUsuario(Usuario loginUsuario) {
         this.loginUsuario = loginUsuario;
     }
 
@@ -204,19 +176,19 @@ public class TransaccionDTO {
         this.accesoPrivado = accesoPrivado;
     }
 
-    public Long getIdClasificacion() {
+    public Clasificacion getIdClasificacion() {
         return idClasificacion;
     }
 
-    public void setIdClasificacion(Long idClasificacion) {
+    public void setIdClasificacion(Clasificacion idClasificacion) {
         this.idClasificacion = idClasificacion;
     }
 
-    public Long getIdTipoDoc() {
+    public TipoDoc getIdTipoDoc() {
         return idTipoDoc;
     }
 
-    public void setIdTipoDoc(Long idTipoDoc) {
+    public void setIdTipoDoc(TipoDoc idTipoDoc) {
         this.idTipoDoc = idTipoDoc;
     }
 }

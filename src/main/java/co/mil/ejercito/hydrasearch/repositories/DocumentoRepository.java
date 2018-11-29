@@ -11,4 +11,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DocumentoRepository extends JpaRepository<Documento, Long>{
 
 public Documento findOneByIdDocumento(Long idDocumento);
-}
+
+  }

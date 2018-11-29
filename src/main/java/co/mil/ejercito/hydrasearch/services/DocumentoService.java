@@ -113,5 +113,25 @@ public class DocumentoService {
         Files.write(path, bytes);
         return path.toString();
     }
+
+    public String verArchivo(MultipartFile file, String directorioRoot, String subDirectorio) throws IOException {
+
+        if (file.isEmpty()) {
+            return "No hay archivo...";
+        }
+
+        int numeroAleatorio = ThreadLocalRandom.current().nextInt(1, 1000);
+        String nuevoNombre = numeroAleatorio + "" + file.getOriginalFilename();
+
+        byte[] bytes = file.getBytes();
+        Path path = Paths.get(directorioRoot + File.separator + subDirectorio + File.separator
+                + file.getOriginalFilename().replace(file.getOriginalFilename(), nuevoNombre));
+        Files.write(path, bytes);
+        return path.toString();
+    }
+
+    public Documento findOneDocumento(Long idDocumento) {
+        return documentoRepository.findOneByIdDocumento(idDocumento);
+    }
     
 }

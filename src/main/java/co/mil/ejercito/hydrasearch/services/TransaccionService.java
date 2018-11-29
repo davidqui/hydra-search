@@ -94,8 +94,6 @@ public class TransaccionService {
 //        return transaccionRepository.findOneByIdTransaccion(idTransaccion);
 //    }
     
-    public Documento findOneDocumento(Long idDocumento) {
-        return documentoRepository.findOneByIdDocumento(idDocumento);
-    }
+
     
 }
