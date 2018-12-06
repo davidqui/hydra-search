@@ -22,7 +22,7 @@ CREATE TABLE "TRANSACCION" (
 "id_exactitud" int8 NOT NULL,
 "id_documento" int8 NOT NULL,
 "fecha_transaccion" timestamp(15) NOT NULL,
-"calificacion_calculada" int8 NOT NULL,
+"calificacion_calculada" int8,
 "descripcion" varchar(255) NOT NULL,
 "usuario_validador" varchar(60) NOT NULL,
 PRIMARY KEY ("id_transaccion") ,
@@ -47,10 +47,10 @@ CREATE TABLE "DOCUMENTO" (
 "id_tipo_doc" int8 NOT NULL,
 "id_documento" serial8 NOT NULL,
 "nombre_doc" varchar(60) NOT NULL,
-"url_documento" text NOT NULL,
+"url_documento" varchar(255) NOT NULL,
 "fecha_creacion" date NOT NULL,
 "extension" varchar(100) NOT NULL,
-"acceso_privado" int2 NOT NULL,
+"acceso_privado" bool NOT NULL,
 PRIMARY KEY ("id_documento") 
 )
 WITHOUT OIDS;
@@ -84,7 +84,7 @@ CREATE TABLE "USUARIO" (
 "id_unidad" int8 NOT NULL,
 "login" varchar(60) NOT NULL,
 "nombre" varchar(255) NOT NULL,
-"nivel_clasificacion" varchar(20) NOT NULL,
+"nivel_clasificacion" varchar(30) NOT NULL,
 PRIMARY KEY ("login") 
 )
 WITHOUT OIDS;
@@ -93,7 +93,7 @@ CREATE TABLE "TRANSICION" (
 "login_usuario" varchar(60) NOT NULL,
 "id_transicion" serial8 NOT NULL,
 "estado" varchar(20) NOT NULL,
-"activo" int8 NOT NULL,
+"activo" bool NOT NULL,
 PRIMARY KEY ("id_transicion") 
 )
 WITHOUT OIDS;
@@ -206,7 +206,7 @@ COMMIT;
 -- Records of USUARIO
 -- ----------------------------
 BEGIN;
-INSERT INTO "public"."USUARIO" VALUES (1, 2, 'aherreram', 'Restringido', 'Alejandro Herrera Montilla');
-INSERT INTO "public"."USUARIO" VALUES (2, 2, 'jcespedeso', 'Secreto', 'Johan Miguel Céspedes Ortega');
-INSERT INTO "public"."USUARIO" VALUES (3, 4, 'dquijanor', 'Confidencial', 'David Antonio Quijano Ramos');
+INSERT INTO "USUARIO" VALUES (1, 2, 'aherreram', 'Restringido', 'Alejandro Herrera Montilla');
+INSERT INTO "USUARIO" VALUES (2, 2, 'jcespedeso', 'Secreto', 'Johan Miguel Céspedes Ortega');
+INSERT INTO "USUARIO" VALUES (3, 4, 'dquijanor', 'Confidencial', 'David Antonio Quijano Ramos');
 COMMIT;
