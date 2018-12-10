@@ -23,6 +23,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
+
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -48,7 +50,8 @@ public class Documento implements Serializable {
     @Column(name = "url_documento")
     private String urlDocumento;
     @Column(name = "fecha_creacion")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
+//    LastModifiedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date fechaCreacion;
     @Size(max = 100)

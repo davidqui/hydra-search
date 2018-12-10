@@ -13,16 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
+import javax.validation.Valid;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,13 +94,13 @@ public class TransaccionController {
      * de los datos que requiere un evento.
      * 
      * @param transaccion Objeto Evento modelado con los datos del formulario.
-//     * @param redirectAttributes Apuntador Clase Spring.
      * @param files Lista de los archivos anexos que envia el formulario.
      * @return Redirecciona hacia ftl que lista la totalidad de los eventos creados.
      */
     @Transactional
     @RequestMapping(path = "/save", method = RequestMethod.POST)
-    public String saves(Transaccion transaccion, Documento documento, String login, @RequestParam("docFile") MultipartFile files) {
+    public ResponseEntity <String> saves(@Valid Transaccion transaccion, @Valid Documento documento, String login, @RequestParam("docFile") MultipartFile files) {
+
         try {
         String subDirectorio = generarCodigoSubDirectorio();
         String directorioFinal=documentoService.generarEstructuraRoot(directorioRoot);
@@ -121,14 +115,14 @@ public class TransaccionController {
         
         transicionService.createTransicionUserCreador(transaccionData,usuarioCreador);
         transicionService.createTransicionUserAsignado(transaccionData, usuarioAsignado);
-        String confirmacion=documentoData.getNombreDoc()+""+"ha sido guardado";
-            return confirmacion;
+
         } catch (IOException ex) {
             Logger.getLogger(TransaccionController.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
 
 
-        return "/index";
+        return new ResponseEntity <> ("Registro Creado Exitosamente...",HttpStatus.OK);
     }
 
     /**
@@ -139,12 +133,19 @@ public class TransaccionController {
     @RequestMapping(path = "/list/{keylog}", method = RequestMethod.GET)
     public ResponseEntity <List<TransaccionDTO>> list(@PathVariable("keylog") String login) {
         Usuario usuarioData=usuarioService.findByLogin(login);
+
+        if (usuarioData==null){
+            return ResponseEntity.notFound().build();
+        }
+
         List<Transicion> listTransiciones=transicionService.findTransicionByUsuario(usuarioData);
         List<TransaccionDTO> listDTO= new ArrayList<>();
         for (Transicion transiciones:listTransiciones) {
             Transaccion transaccionData=transaccionService.findById(transiciones.getIdTransaccion().getIdTransaccion());
             Documento documentoData=documentoService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
+
             TransaccionDTO transaccionDTO= new TransaccionDTO();
+
             transaccionDTO.setIdTransaccion(transaccionData.getIdTransaccion());
             transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
             transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
@@ -157,6 +158,9 @@ public class TransaccionController {
             transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
             transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
             transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
+            transaccionDTO.setFactoresCollection(transaccionData.getFactoresCollection());
+            transaccionDTO.setAmenazaCollection(transaccionData.getAmenazaCollection());
+
             listDTO.add(transaccionDTO);
         }
 
@@ -168,17 +172,23 @@ public class TransaccionController {
      * @param idTransaccion Id de la transaccion a consultar.
      * @return Objeto DTO con la informacion de la transaccion consultada.
      */
-    @RequestMapping(path = "/edit/{key}", method = RequestMethod.GET)
+    @RequestMapping(path = "/view/{key}", method = RequestMethod.GET)
     public ResponseEntity <TransaccionDTO> editarTrasaccion(@PathVariable("key") Long idTransaccion) {
 
         TransaccionDTO transaccionDTO= new TransaccionDTO();
 
         Transaccion transaccionOne=transaccionService.findById(idTransaccion);
+
+        if (transaccionOne==null){
+            return ResponseEntity.notFound().build();
+        }
+
         Transicion transicionData=transicionService.findTransicionActiva(transaccionOne);
         Transaccion transaccionData=transaccionService.findById(idTransaccion);
         Documento documentoData=documentoService.findOneDocumento(transaccionData.getIdDocumento().getIdDocumento());
         
         transaccionDTO.setIdTransaccion(idTransaccion);
+
         transaccionDTO.setFechaTransaccion(transaccionData.getFechaTransaccion());
         transaccionDTO.setCalificacionCalculada(transaccionData.getCalificacionCalculada());
         transaccionDTO.setDescripcion(transaccionData.getDescripcion());
@@ -193,8 +203,8 @@ public class TransaccionController {
         transaccionDTO.setAccesoPrivado(documentoData.getAccesoPrivado());
         transaccionDTO.setIdClasificacion(documentoData.getIdClasificacion());
         transaccionDTO.setIdTipoDoc(documentoData.getIdTipoDoc());
-//        transaccionDTO.setFactoresCollection(transaccionData);
-//        transaccionDTO.setAmenazaCollection(transaccionData.getFactoresCollection());
+        transaccionDTO.setFactoresCollection(transaccionData.getFactoresCollection());
+        transaccionDTO.setAmenazaCollection(transaccionData.getAmenazaCollection());
 
         return new ResponseEntity <> (transaccionDTO,HttpStatus.OK);
     }
@@ -207,9 +217,10 @@ public class TransaccionController {
      * @param codigo Valor recibido desde el formulario que contiene el numero que identifica el archivo
      * @throws IOException 
      */
-    @RequestMapping(path = "/descargar/{codigo}", method = RequestMethod.GET)
+    @RequestMapping(path = "/download/{codigo}", method = RequestMethod.GET)
     public void descargarArchivo(HttpServletResponse response, @PathVariable("codigo") Long codigo) throws IOException {
         Documento documentoData=documentoService.findOneDocumento(codigo);
+
         try {
             String nombreFichero = documentoData.getNombreDoc();
             String url = documentoData.getUrlDocumento();

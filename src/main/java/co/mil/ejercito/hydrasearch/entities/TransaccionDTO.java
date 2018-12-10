@@ -21,12 +21,11 @@ import java.util.List;
  *
  * @author aherreram
  */
-@Entity
 public class TransaccionDTO {
     
     
 //    Campos Transaccion
-    @Id
+
     private Long idTransaccion;
     @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -35,8 +34,9 @@ public class TransaccionDTO {
     private String descripcion;
     private Credibilidad idCredibilidad;
     private Exactitud idExactitud;
-//    private Collection <Amenaza> amenazaCollection;
-//    private Collection <FactoresInestabilidad> factoresCollection;
+
+    private Collection <Amenaza> amenazaCollection;
+    private Collection <FactoresInestabilidad> factoresCollection;
 
 //    Campos Trasicion
     private String estado;
@@ -190,5 +190,21 @@ public class TransaccionDTO {
 
     public void setIdTipoDoc(TipoDoc idTipoDoc) {
         this.idTipoDoc = idTipoDoc;
+    }
+
+    public Collection<Amenaza> getAmenazaCollection() {
+        return amenazaCollection;
+    }
+
+    public void setAmenazaCollection(Collection<Amenaza> amenazaCollection) {
+        this.amenazaCollection = amenazaCollection;
+    }
+
+    public Collection<FactoresInestabilidad> getFactoresCollection() {
+        return factoresCollection;
+    }
+
+    public void setFactoresCollection(Collection<FactoresInestabilidad> factoresCollection) {
+        this.factoresCollection = factoresCollection;
     }
 }
