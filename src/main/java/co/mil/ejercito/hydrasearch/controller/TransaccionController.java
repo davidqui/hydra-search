@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 public class TransaccionController {
 
     private static final Logger LOG = Logger.getLogger(TransaccionController.class.getName());
-       
     @Autowired
     private TransaccionService transaccionService;
     @Autowired
@@ -97,6 +96,7 @@ public class TransaccionController {
      * @param files Lista de los archivos anexos que envia el formulario.
      * @return Redirecciona hacia ftl que lista la totalidad de los eventos creados.
      */
+
     @Transactional
     @RequestMapping(path = "/save", method = RequestMethod.POST)
     public ResponseEntity <String> saves(@Valid Transaccion transaccion, @Valid Documento documento, String login, @RequestParam("docFile") MultipartFile files) {
@@ -106,6 +106,8 @@ public class TransaccionController {
         String directorioFinal=documentoService.generarEstructuraRoot(directorioRoot);
         documentoService.crearDirectorios(directorioFinal, subDirectorio);
         String ubicacionFile=documentoService.guardarArchivo(files, directorioFinal, subDirectorio);
+
+        System.out.println("<<<<<<<<data documento = >>>>>>>>>>>><" + documento.getIdTipoDoc()+documento.getIdClasificacion());
         Documento documentoData = documentoService.create(documento, files, ubicacionFile);
 
         Transaccion transaccionData= transaccionService.create(transaccion,documentoData);
